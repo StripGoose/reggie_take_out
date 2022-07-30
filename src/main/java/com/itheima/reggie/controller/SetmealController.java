@@ -6,7 +6,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.itheima.reggie.common.R;
 import com.itheima.reggie.dto.SetmealDto;
 import com.itheima.reggie.entity.Category;
-import com.itheima.reggie.entity.Dish;
 import com.itheima.reggie.entity.Setmeal;
 import com.itheima.reggie.service.CategoryService;
 import com.itheima.reggie.service.SetmealDishService;
@@ -41,7 +40,7 @@ public class SetmealController  {
 
     /**
      * 新增套餐
-     * 删除全部套餐缓存
+     * 清除全部套餐缓存
      * @param setmealDto
      * @return
      */
@@ -62,6 +61,7 @@ public class SetmealController  {
      * @return
      */
     @GetMapping("/page")
+    @Cacheable(value = "setmealCache",key = "'page' + #page + '_' + #pageSize + '_' + #name")
     public R<Page> page(int page,int pageSize,String name){
         ///分页构造器
         Page<Setmeal> pageInfo = new Page<>(page,pageSize);
@@ -101,7 +101,7 @@ public class SetmealController  {
 
     /**
      * 删除套餐
-     * 删除全部套餐缓存
+     * 清除全部套餐缓存
      * @param ids
      * @return
      */
@@ -121,6 +121,7 @@ public class SetmealController  {
      * @return
      */
     @GetMapping("{id}")
+    @Cacheable(value = "setmealCache",key = "'get' + #id")
     public R<SetmealDto> get(@PathVariable Long id){
         SetmealDto setmealDto = setmealService.getByIdWithDish(id);
         return R.success(setmealDto);
@@ -128,17 +129,26 @@ public class SetmealController  {
 
     /**
      * 更新套餐
+     * 清除全部套餐缓存
      * @param setmealDto
      * @return
      */
     @PutMapping
+    @CacheEvict(value = "setmealCache",allEntries = true)
     public R<String> updateWithDish(@RequestBody SetmealDto setmealDto){
-
         setmealService.updateWithDish(setmealDto);
         return R.success("更新成功");
     }
 
+    /**
+     * 修改套餐状态
+     * 清除全部套餐缓存
+     * @param status
+     * @param ids
+     * @return
+     */
     @PostMapping("/status/{status}")
+    @CacheEvict(value = "setmealCache",allEntries = true)
     public R<String> status(@PathVariable int status,@RequestParam List<Long> ids){
         //update setmeal set status={status} in (1,2,3)
         //条件构造器
@@ -156,11 +166,11 @@ public class SetmealController  {
      * @return
      */
     @GetMapping("/list")
-    @Cacheable(value = "setmealCache",key = "#setmeal.categoryId + '_' + #setmeal.status")
+    @Cacheable(value = "setmealCache",key = "'list' + #setmeal.categoryId + '_' + #setmeal.status")
     public R<List<Setmeal>> list(Setmeal setmeal){
         LambdaQueryWrapper<Setmeal> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(setmeal.getCategoryId() != null,Setmeal::getCategoryId,setmeal.getCategoryId());
-        queryWrapper.eq(setmeal.getStatus() != null,Setmeal::getStatus,setmeal.getStatus());//status是1
+        queryWrapper.eq(Setmeal::getCategoryId,setmeal.getCategoryId());//一定会有
+        queryWrapper.eq(Setmeal::getStatus,setmeal.getStatus());//status是1
         queryWrapper.orderByDesc(Setmeal::getUpdateTime);
 
         List<Setmeal> list = setmealService.list(queryWrapper);

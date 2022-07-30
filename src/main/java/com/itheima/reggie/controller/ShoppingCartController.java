@@ -7,6 +7,8 @@ import com.itheima.reggie.entity.ShoppingCart;
 import com.itheima.reggie.service.ShoppingCartService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -29,6 +31,7 @@ public class ShoppingCartController {
      * @return
      */
     @PostMapping("/add")
+    @CacheEvict(value = "ShoppingCartCache",allEntries = true)
     public R<ShoppingCart> add(@RequestBody ShoppingCart shoppingCart){
         log.info("购物车数据：{}",shoppingCart);
 
@@ -75,6 +78,7 @@ public class ShoppingCartController {
      * @return
      */
     @GetMapping("/list")
+    @Cacheable(value = "ShoppingCartCache",key = "'list'")
     public R<List<ShoppingCart>> list(){
         log.info("查看购物车...");
 
@@ -92,9 +96,9 @@ public class ShoppingCartController {
      * @return
      */
     @DeleteMapping("/clean")
+    @CacheEvict(value = "ShoppingCartCache",allEntries = true)
     public R<String> clean(){
         //SQL:delete from shopping_cart where user_id = ?
-
         LambdaQueryWrapper<ShoppingCart> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(ShoppingCart::getUserId,BaseContext.getCurrentId());
 

@@ -8,6 +8,8 @@ import com.itheima.reggie.service.EmployeeService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -78,6 +80,7 @@ public class EmployeeController {
      * @return
      */
     @PostMapping
+    @CacheEvict(value = "employeeCache",allEntries = true)
     public R<String> save(HttpServletRequest request,@RequestBody Employee employee){
         log.info("新增员工，员工信息：{}",employee.toString());
 
@@ -106,6 +109,7 @@ public class EmployeeController {
      * @return
      */
     @GetMapping("/page")
+    @Cacheable(value = "employeeCache",key = "'page' + #page + '_' + #pageSize")
     public R<Page> page(int page,int pageSize,String name){
         log.info("page = {},pageSize = {},name = {}" ,page,pageSize,name);
 
@@ -131,6 +135,7 @@ public class EmployeeController {
      * @return
      */
     @PutMapping
+    @CacheEvict(value = "employeeCache",allEntries = true)
     public R<String> update(HttpServletRequest request,@RequestBody Employee employee){
         log.info(employee.toString());
 
@@ -151,6 +156,7 @@ public class EmployeeController {
      * @return
      */
     @GetMapping("/{id}")
+    @Cacheable(value = "employeeCache",key = "'getById' + #id")
     public R<Employee> getById(@PathVariable Long id){
         log.info("根据id查询员工信息...");
         Employee employee = employeeService.getById(id);
