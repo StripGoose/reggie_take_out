@@ -14,6 +14,8 @@ import com.itheima.reggie.service.DishService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
@@ -48,6 +50,7 @@ public class DishController {
      * @return
      */
     @PostMapping
+    @CacheEvict(value = "dishCache",allEntries = true)
     public R<String> save(@RequestBody DishDto dishDto){
         log.info(dishDto.toString());
 
@@ -58,8 +61,8 @@ public class DishController {
         //redisTemplate.delete(keys);
 
         //清理某个分类下面的菜品缓存数据
-        String key = "dish_" + dishDto.getCategoryId() + "_1";
-        redisTemplate.delete(key);
+        //String key = "dish_" + dishDto.getCategoryId() + "_1";
+        //redisTemplate.delete(key);
 
         return R.success("新增菜品成功");
     }
@@ -72,6 +75,7 @@ public class DishController {
      * @return
      */
     @GetMapping("/page")
+    @Cacheable(value = "dishCache",key = "'page' + #page + '_' + #pageSize + '_' + #name")
     public R<Page> page(int page,int pageSize,String name){
 
         //构造分页构造器对象
@@ -120,6 +124,7 @@ public class DishController {
      * @return
      */
     @GetMapping("/{id}")
+    @Cacheable(value = "dishCache",key = "'get' + #id")
     public R<DishDto> get(@PathVariable Long id){
         DishDto dishDto = dishService.getByIdWithFlavor(id);
         return R.success(dishDto);
@@ -131,6 +136,7 @@ public class DishController {
      * @return
      */
     @PutMapping
+    @CacheEvict(value = "dishCache",allEntries = true)
     public R<String> update(@RequestBody DishDto dishDto){
         log.info(dishDto.toString());
 
@@ -141,8 +147,8 @@ public class DishController {
         //redisTemplate.delete(keys);
 
         //清理某个分类下面的菜品缓存数据
-        String key = "dish_" + dishDto.getCategoryId() + "_1";
-        redisTemplate.delete(key);
+        //String key = "dish_" + dishDto.getCategoryId() + "_1";
+        //redisTemplate.delete(key);
 
         return R.success("修改菜品成功");
     }
@@ -167,19 +173,20 @@ public class DishController {
         return R.success(list);
     }*/
     @GetMapping("/list")
+    @Cacheable(value = "dishCache",key = "'list' + #dish.categoryId + '_' + #dish.status")
     public R<List<DishDto>> list(Dish dish){
-        List<DishDto> dishDtoList = null;
+        //List<DishDto> dishDtoList = null;
 
         //动态构造key
-        String key = "dish_" + dish.getCategoryId() + "_" + dish.getStatus();//dish_xxxxxxxxx_1
+        //String key = "dish_" + dish.getCategoryId() + "_" + dish.getStatus();//dish_xxxxxxxxx_1
 
         //先从redis中获取缓存数据
-        dishDtoList = (List<DishDto>) redisTemplate.opsForValue().get(key);
+        //dishDtoList = (List<DishDto>) redisTemplate.opsForValue().get(key);
 
-        if (dishDtoList != null){
+        /*if (dishDtoList != null){
             //如果存在，直接返回，无需查询数据库
             return R.success(dishDtoList);
-        }
+        }*/
 
         //构造查询条件
         LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
@@ -192,7 +199,7 @@ public class DishController {
 
         List<Dish> list = dishService.list(queryWrapper);
 
-        dishDtoList = list.stream().map((item) -> {
+        List<DishDto> dishDtoList = list.stream().map((item) -> {
             DishDto dishDto = new DishDto();
             //records数据循环拷贝给dishDto
             BeanUtils.copyProperties(item,dishDto);
@@ -216,7 +223,7 @@ public class DishController {
         }).collect(Collectors.toList());
 
         //如果不存在，走数据库，将查询到的菜品数据缓存到Redis，超时60分钟自动清理
-        redisTemplate.opsForValue().set(key,dishDtoList,60, TimeUnit.MINUTES);
+        //redisTemplate.opsForValue().set(key,dishDtoList,60, TimeUnit.MINUTES);
 
         return R.success(dishDtoList);
     }
@@ -227,6 +234,7 @@ public class DishController {
      * @return
      */
     @DeleteMapping
+    @CacheEvict(value = "dishCache",allEntries = true)
     public R<String> delete(@RequestParam List<Long> ids){
         log.info("ids:{}",ids);
 
@@ -235,7 +243,14 @@ public class DishController {
         return R.success("菜品数据删除成功");
     }
 
+    /**
+     * 修改套餐状态
+     * @param status
+     * @param ids
+     * @return
+     */
     @PostMapping("/status/{status}")
+    @CacheEvict(value = "dishCache",allEntries = true)
     public R<String> status(@PathVariable int status,@RequestParam List<Long> ids){
         //update dish set status=0/1 where id in (1,2,3)
         //条件构造器

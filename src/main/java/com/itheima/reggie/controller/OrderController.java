@@ -13,6 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.server.Session;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -38,6 +40,7 @@ public class OrderController {
      * @return
      */
     @PostMapping("/submit")
+    @CacheEvict(value = "orderCache",allEntries = true)
     public R<String> submit(@RequestBody Orders orders){
         log.info("订单数据：{}",orders);
         orderService.sumbit(orders);
@@ -54,6 +57,7 @@ public class OrderController {
      * @return
      */
     @GetMapping("/page")
+    @Cacheable(value = "orderCache",key = "'page' + #page + '_' + #pageSize + '_' + #number + '_' + #beginTime + '_' + #endTime")
     public R<Page> page(int page, int pageSize,String number,String beginTime,String endTime){
 
         //构造分页构造器对象
@@ -97,6 +101,7 @@ public class OrderController {
      * @return
      */
     @PutMapping
+    @CacheEvict(value = "orderCache",allEntries = true)
     public R<String> update(@RequestBody Orders orders){
         log.info("orders:{}",orders);
         orderService.updateById(orders);
@@ -110,6 +115,7 @@ public class OrderController {
      * @return
      */
     @GetMapping("/userPage")
+    @Cacheable(value = "orderCache",key = "'userPage' + #page + '_' + #pageSize")
     public R<Page> userPage(int page, int pageSize){
 
         //分页构造器
