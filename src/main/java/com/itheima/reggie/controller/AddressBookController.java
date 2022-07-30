@@ -28,7 +28,9 @@ public class AddressBookController {
     private AddressBookService addressBookService;
 
     /**
-     * 新增
+     * 新增地址
+     * @param addressBook
+     * @return
      */
     @PostMapping
     @CacheEvict(value = "AddressCache",allEntries = true)
@@ -40,7 +42,35 @@ public class AddressBookController {
     }
 
     /**
+     * 修改地址
+     * @param addressBook
+     * @return
+     */
+    @PutMapping
+    @CacheEvict(value = "AddressCache",allEntries = true)
+    public R<String> update(@RequestBody AddressBook addressBook){
+
+        addressBookService.updateById(addressBook);
+
+        return R.success("更新成功");
+    }
+
+    /**
+     * 根据id删除地址
+     * @param ids
+     * @return
+     */
+    @DeleteMapping
+    @CacheEvict(value = "AddressCache",allEntries = true)
+    public R<String> delete(Long ids){
+        addressBookService.removeById(ids);
+
+        return R.success("地址删除成功");
+    }
+    /**
      * 设置默认地址
+     * @param addressBook
+     * @return
      */
     @PutMapping("default")
     @CacheEvict(value = "AddressCache",allEntries = true)
@@ -109,4 +139,6 @@ public class AddressBookController {
         //SQL:select * from address_book where user_id = ? order by update_time desc
         return R.success(addressBookService.list(queryWrapper));
     }
+
+
 }
