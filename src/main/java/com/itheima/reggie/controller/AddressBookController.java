@@ -7,6 +7,10 @@ import com.itheima.reggie.common.BaseContext;
 import com.itheima.reggie.common.R;
 import com.itheima.reggie.entity.AddressBook;
 import com.itheima.reggie.service.AddressBookService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -22,6 +26,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping("/addressBook")
+@Api(tags = "地址簿管理接口")
 public class AddressBookController {
 
     @Autowired
@@ -34,6 +39,7 @@ public class AddressBookController {
      */
     @PostMapping
     @CacheEvict(value = "AddressCache",allEntries = true)
+    @ApiOperation(value = "新增地址")
     public R<AddressBook> save(@RequestBody AddressBook addressBook) {
         addressBook.setUserId(BaseContext.getCurrentId());
         log.info("addressBook:{}", addressBook);
@@ -48,8 +54,9 @@ public class AddressBookController {
      */
     @PutMapping
     @CacheEvict(value = "AddressCache",allEntries = true)
+    @ApiOperation(value = "修改地址")
     public R<String> update(@RequestBody AddressBook addressBook){
-
+        System.out.println(addressBook);
         addressBookService.updateById(addressBook);
 
         return R.success("更新成功");
@@ -62,6 +69,8 @@ public class AddressBookController {
      */
     @DeleteMapping
     @CacheEvict(value = "AddressCache",allEntries = true)
+    @ApiOperation(value = "根据id删除地址")
+    @ApiImplicitParam(name = "ids",value = "id",required = true)
     public R<String> delete(Long ids){
         addressBookService.removeById(ids);
 
@@ -74,6 +83,7 @@ public class AddressBookController {
      */
     @PutMapping("default")
     @CacheEvict(value = "AddressCache",allEntries = true)
+    @ApiOperation(value = "设置默认地址")
     public R<AddressBook> setDefault(@RequestBody AddressBook addressBook) {
         log.info("addressBook:{}", addressBook);
         LambdaUpdateWrapper<AddressBook> wrapper = new LambdaUpdateWrapper<>();
@@ -93,6 +103,8 @@ public class AddressBookController {
      */
     @GetMapping("/{id}")
     @Cacheable(value = "AddressCache",key = "'get' + #id")
+    @ApiOperation(value = "根据id查询地址")
+    @ApiImplicitParam(name = "id",value = "id",required = true)
     public R get(@PathVariable Long id) {
         AddressBook addressBook = addressBookService.getById(id);
         if (addressBook != null) {
@@ -107,6 +119,7 @@ public class AddressBookController {
      */
     @GetMapping("default")
     @Cacheable(value = "AddressCache",key = "'getDefault' + #result.data.userId + '_' + '1'")
+    @ApiOperation(value = "查询默认地址")
     public R<AddressBook> getDefault() {
         LambdaQueryWrapper<AddressBook> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(AddressBook::getUserId, BaseContext.getCurrentId());
@@ -127,6 +140,7 @@ public class AddressBookController {
      */
     @GetMapping("/list")
     @Cacheable(value = "AddressCache",key = "'list' + #addressBook.userId")
+    @ApiOperation(value = "查询指定用户的全部地址")
     public R<List<AddressBook>> list(AddressBook addressBook) {
         addressBook.setUserId(BaseContext.getCurrentId());
         log.info("addressBook:{}", addressBook);

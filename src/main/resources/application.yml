@@ -71,9 +71,14 @@ mybatis-plus:
 reggie:
   path: D:\img\
 
+#关闭swagger，默认是开启的
+swagger:
+  enable: true
+
+
+
 
 #腾讯云短信服务
 #txy:
 #  secretId: AKIDDF1WkhOoxqTpuiEUSAakdGciX5AzXppY
 #  secretKey: UhdHelbARSCfrnSqwlJaaIkunPkob7LJ
-

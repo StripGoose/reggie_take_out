@@ -11,6 +11,10 @@ import com.itheima.reggie.entity.DishFlavor;
 import com.itheima.reggie.service.CategoryService;
 import com.itheima.reggie.service.DishFlavorService;
 import com.itheima.reggie.service.DishService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +34,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/dish")
 @Slf4j
+@Api(tags = "菜品管理接口")
 public class DishController {
 
     @Autowired
@@ -51,6 +56,7 @@ public class DishController {
      */
     @PostMapping
     @CacheEvict(value = "dishCache",allEntries = true)
+    @ApiOperation(value = "新增菜品")
     public R<String> save(@RequestBody DishDto dishDto){
         log.info(dishDto.toString());
 
@@ -76,6 +82,12 @@ public class DishController {
      */
     @GetMapping("/page")
     @Cacheable(value = "dishCache",key = "'page' + #page + '_' + #pageSize + '_' + #name")
+    @ApiOperation(value = "菜品信息分页查询")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page",value = "页码",required = true),
+            @ApiImplicitParam(name = "pageSize",value = "每页记录数",required = true),
+            @ApiImplicitParam(name = "name",value = "菜品名称",required = false)
+    })
     public R<Page> page(int page,int pageSize,String name){
 
         //构造分页构造器对象
@@ -125,6 +137,8 @@ public class DishController {
      */
     @GetMapping("/{id}")
     @Cacheable(value = "dishCache",key = "'get' + #id")
+    @ApiOperation(value = "根据id查询菜品信息和对应的口味信息")
+    @ApiImplicitParam(name = "id",value = "id",required = true)
     public R<DishDto> get(@PathVariable Long id){
         DishDto dishDto = dishService.getByIdWithFlavor(id);
         return R.success(dishDto);
@@ -137,6 +151,7 @@ public class DishController {
      */
     @PutMapping
     @CacheEvict(value = "dishCache",allEntries = true)
+    @ApiOperation(value = "修改菜品")
     public R<String> update(@RequestBody DishDto dishDto){
         log.info(dishDto.toString());
 
@@ -174,6 +189,7 @@ public class DishController {
     }*/
     @GetMapping("/list")
     @Cacheable(value = "dishCache",key = "'list' + #dish.categoryId + '_' + #dish.status")
+    @ApiOperation(value = "根据条件查询对应的菜品数据")
     public R<List<DishDto>> list(Dish dish){
         //List<DishDto> dishDtoList = null;
         //动态构造key
@@ -232,6 +248,8 @@ public class DishController {
      */
     @DeleteMapping
     @CacheEvict(value = "dishCache",allEntries = true)
+    @ApiOperation(value = "删除菜品")
+    @ApiImplicitParam(name = "ids",value = "已选的菜品id",required = true)
     public R<String> delete(@RequestParam List<Long> ids){
         log.info("ids:{}",ids);
 
@@ -248,6 +266,11 @@ public class DishController {
      */
     @PostMapping("/status/{status}")
     @CacheEvict(value = "dishCache",allEntries = true)
+    @ApiOperation(value = "修改菜品状态")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "status",value = "状态",required = true),
+            @ApiImplicitParam(name = "ids",value = "已选的菜品id",required = true),
+    })
     public R<String> status(@PathVariable int status,@RequestParam List<Long> ids){
         //update dish set status=0/1 where id in (1,2,3)
         //条件构造器

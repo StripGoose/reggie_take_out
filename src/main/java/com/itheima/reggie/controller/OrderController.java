@@ -9,6 +9,10 @@ import com.itheima.reggie.dto.OrdersDto;
 import com.itheima.reggie.entity.User;
 import com.itheima.reggie.service.OrderService;
 import com.itheima.reggie.service.UserService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +30,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestController
 @RequestMapping("/order")
+@Api(tags = "订单接口")
 public class OrderController {
 
     @Autowired
@@ -41,6 +46,7 @@ public class OrderController {
      */
     @PostMapping("/submit")
     @CacheEvict(value = "orderCache",allEntries = true)
+    @ApiOperation(value = "用户下单")
     public R<String> submit(@RequestBody Orders orders){
         log.info("订单数据：{}",orders);
         orderService.sumbit(orders);
@@ -58,6 +64,14 @@ public class OrderController {
      */
     @GetMapping("/page")
     @Cacheable(value = "orderCache",key = "'page' + #page + '_' + #pageSize + '_' + #number + '_' + #beginTime + '_' + #endTime")
+    @ApiOperation(value = "订单信息分页查询")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page",value = "页码",required = true),
+            @ApiImplicitParam(name = "pageSize",value = "每页记录数",required = true),
+            @ApiImplicitParam(name = "number",value = "订单号",required = false),
+            @ApiImplicitParam(name = "beginTime",value = "开始时间",required = false),
+            @ApiImplicitParam(name = "endTime",value = "结束时间",required = false)
+    })
     public R<Page> page(int page, int pageSize,String number,String beginTime,String endTime){
 
         //构造分页构造器对象
@@ -102,6 +116,7 @@ public class OrderController {
      */
     @PutMapping
     @CacheEvict(value = "orderCache",allEntries = true)
+    @ApiOperation(value = "修改订单状态")
     public R<String> update(@RequestBody Orders orders){
         log.info("orders:{}",orders);
         orderService.updateById(orders);
@@ -116,6 +131,11 @@ public class OrderController {
      */
     @GetMapping("/userPage")
     @Cacheable(value = "orderCache",key = "'userPage' + #page + '_' + #pageSize")
+    @ApiOperation(value = "用户订单信息分页查询")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page",value = "页码",required = true),
+            @ApiImplicitParam(name = "pageSize",value = "每页记录数",required = true),
+    })
     public R<Page> userPage(int page, int pageSize){
 
         //分页构造器

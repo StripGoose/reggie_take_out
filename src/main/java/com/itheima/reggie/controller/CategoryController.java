@@ -5,6 +5,10 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.itheima.reggie.common.R;
 import com.itheima.reggie.entity.Category;
 import com.itheima.reggie.service.CategoryService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -19,6 +23,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/category")
 @Slf4j
+@Api(tags = "分类管理接口")
 public class CategoryController {
     @Autowired
     private CategoryService categoryService;
@@ -30,6 +35,7 @@ public class CategoryController {
      */
     @PostMapping
     @CacheEvict(value = "categoryCache",allEntries = true)
+    @ApiOperation(value = "新增分类")
     public R<String> save(@RequestBody Category category){
         log.info("category:{}",category);
         categoryService.save(category);
@@ -44,6 +50,11 @@ public class CategoryController {
      */
     @GetMapping("/page")
     @Cacheable(value = "categoryCache",key = "'page'+ #page + '_' + #pageSize")
+    @ApiOperation(value = "分页查询")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page",value = "页码",required = true),
+            @ApiImplicitParam(name = "pageSize",value = "每页记录数",required = true),
+    })
     public R<Page> page(int page,int pageSize){
         //分页构造器
         Page<Category> pageInfo = new Page<>(page, pageSize);
@@ -65,6 +76,8 @@ public class CategoryController {
      */
     @DeleteMapping
     @CacheEvict(value = "categoryCache",allEntries = true)
+    @ApiOperation(value = "根据id删除分类")
+    @ApiImplicitParam(name = "id",value = "id",required = true)
     public R<String> delete(Long id){
         log.info("删除分类，id为:{}",id);
 
@@ -82,6 +95,7 @@ public class CategoryController {
      */
     @PutMapping
     @CacheEvict(value = "categoryCache",allEntries = true)
+    @ApiOperation(value = "根据id修改分类信息")
     public R<String> update(@RequestBody Category category){
         log.info("修改分类信u息：{}",category);
 
@@ -97,6 +111,7 @@ public class CategoryController {
      */
     @GetMapping("/list")
     @Cacheable(value = "categoryCache",key = "'list'+ '_' + #category.type")
+    @ApiOperation(value = "根据条件查询分类数据")
     public R<List<Category>> list(Category category){
         //条件构造器
         LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();

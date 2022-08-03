@@ -5,6 +5,8 @@ import com.itheima.reggie.common.BaseContext;
 import com.itheima.reggie.common.R;
 import com.itheima.reggie.entity.ShoppingCart;
 import com.itheima.reggie.service.ShoppingCartService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -20,6 +22,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping("/shoppingCart")
+@Api(tags = "购物车接口")
 public class ShoppingCartController {
 
     @Autowired
@@ -32,6 +35,7 @@ public class ShoppingCartController {
      */
     @PostMapping("/add")
     @CacheEvict(value = "ShoppingCartCache",allEntries = true)
+    @ApiOperation(value = "添加购物车")
     public R<ShoppingCart> add(@RequestBody ShoppingCart shoppingCart){
         log.info("购物车数据：{}",shoppingCart);
 
@@ -79,6 +83,7 @@ public class ShoppingCartController {
      */
     @GetMapping("/list")
     @Cacheable(value = "ShoppingCartCache",key = "'list'")
+    @ApiOperation(value = "查看购物车")
     public R<List<ShoppingCart>> list(){
         log.info("查看购物车...");
 
@@ -97,6 +102,7 @@ public class ShoppingCartController {
      */
     @DeleteMapping("/clean")
     @CacheEvict(value = "ShoppingCartCache",allEntries = true)
+    @ApiOperation(value = "清空购物车")
     public R<String> clean(){
         //SQL:delete from shopping_cart where user_id = ?
         LambdaQueryWrapper<ShoppingCart> queryWrapper = new LambdaQueryWrapper<>();
