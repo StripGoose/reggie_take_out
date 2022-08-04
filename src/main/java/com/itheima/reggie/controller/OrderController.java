@@ -4,10 +4,14 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.itheima.reggie.common.BaseContext;
 import com.itheima.reggie.common.R;
+import com.itheima.reggie.entity.OrderDetail;
 import com.itheima.reggie.entity.Orders;
 import com.itheima.reggie.dto.OrdersDto;
+import com.itheima.reggie.entity.ShoppingCart;
 import com.itheima.reggie.entity.User;
+import com.itheima.reggie.service.OrderDetailService;
 import com.itheima.reggie.service.OrderService;
+import com.itheima.reggie.service.ShoppingCartService;
 import com.itheima.reggie.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -19,8 +23,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.server.Session;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,13 +45,19 @@ public class OrderController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private OrderDetailService orderDetailService;
+
+    @Autowired
+    private ShoppingCartService shoppingCartService;
+
     /**
      * 用户下单
      * @param orders
      * @return
      */
     @PostMapping("/submit")
-    @CacheEvict(value = "orderCache",allEntries = true)
+    @Caching(evict = {@CacheEvict(value = "orderCache",allEntries = true),@CacheEvict(value = "ShoppingCartCache",allEntries = true)})
     @ApiOperation(value = "用户下单")
     public R<String> submit(@RequestBody Orders orders){
         log.info("订单数据：{}",orders);
@@ -148,5 +160,37 @@ public class OrderController {
         orderService.page(ordersPage,queryWrapper);
 
         return R.success(ordersPage);
+    }
+
+    /**
+     * 再来一单
+     * @param orders
+     * @return
+     */
+    @PostMapping("/again")
+    @Caching(evict = {@CacheEvict(value = "orderCache",allEntries = true),@CacheEvict(value = "ShoppingCartCache",allEntries = true)})
+    @ApiOperation(value = "再来一单")
+    public R<String> again(@RequestBody Orders orders){
+        Long ordersId = orders.getId();
+
+        LambdaQueryWrapper<OrderDetail> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(OrderDetail::getOrderId,ordersId);
+        List<OrderDetail> orderDetails = orderDetailService.list(queryWrapper);
+
+        List<ShoppingCart> shoppingCartList = orderDetails.stream().map((item) -> {
+            ShoppingCart shoppingCart = new ShoppingCart();
+            item.setId(null);
+            //属性拷贝
+            BeanUtils.copyProperties(item,shoppingCart);
+            //用户id
+            shoppingCart.setUserId(BaseContext.getCurrentId());
+            //创建时间
+            shoppingCart.setCreateTime(LocalDateTime.now());
+            return shoppingCart;
+        }).collect(Collectors.toList());
+
+        shoppingCartService.saveBatch(shoppingCartList);
+
+        return R.success("ok");
     }
 }

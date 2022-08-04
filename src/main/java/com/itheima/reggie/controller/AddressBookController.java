@@ -81,7 +81,7 @@ public class AddressBookController {
      * @param addressBook
      * @return
      */
-    @PutMapping("default")
+    @PutMapping("/default")
     @CacheEvict(value = "AddressCache",allEntries = true)
     @ApiOperation(value = "设置默认地址")
     public R<AddressBook> setDefault(@RequestBody AddressBook addressBook) {
@@ -116,9 +116,9 @@ public class AddressBookController {
 
     /**
      * 查询默认地址
+     * 做不了注解缓存
      */
-    @GetMapping("default")
-    @Cacheable(value = "AddressCache",key = "'getDefault' + #result.data.userId + '_' + '1'")
+    @GetMapping("/default")
     @ApiOperation(value = "查询默认地址")
     public R<AddressBook> getDefault() {
         LambdaQueryWrapper<AddressBook> queryWrapper = new LambdaQueryWrapper<>();
