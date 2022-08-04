@@ -55,7 +55,7 @@ public class UserController {
             String[] codes = {code};
 
             //调用腾讯云提供的短信服务API完成发送短信(慎用，都是钱T_T)
-            //SMSUtils.sendMessage(phones,codes);
+            SMSUtils.sendMessage(phones,codes);
 
             //生成的验证码保存到session
             //session.setAttribute(phone,code);

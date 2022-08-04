@@ -67,9 +67,12 @@ mybatis-plus:
     db-config:
       id-type: ASSIGN_ID
 
-reggie:
-  path: /home/user001/img
+#reggie:
+#  path: D:\img\
 
+#服务器图片地址
+reggie:
+  path: /home/user001/img/
 
 #关闭swagger，默认是开启的
 swagger:
