@@ -20,12 +20,6 @@ import org.springframework.beans.factory.annotation.Value;
  */
 public class SMSUtils {
 
-	@Value("${txy.secretId}")
-	private String secretId;
-
-	@Value("${txy.secretKey}")
-	private String secretKey;
-
 	/**
 	 *发送短信
 	 * @param phoneNumberSet
@@ -39,7 +33,7 @@ public class SMSUtils {
 			 * 你也可以直接在代码中写死密钥对，但是小心不要将代码复制、上传或者分享给他人，
 			 * 以免泄露密钥对危及你的财产安全。
 			 * SecretId、SecretKey 查询: https://console.cloud.tencent.com/cam/capi */
-			Credential cred = new Credential("AKIDDF1WkhOoxqTpuiEUSAakdGciX5AzXppY", "UhdHelbARSCfrnSqwlJaaIkunPkob7LJ");
+			Credential cred = new Credential("AKIDGRcgf2GHMEroX2MYCfuvj9MUSEm5B5nG", "xxxxxxxxxxxxxxxxx");
 
 			/* 非必要步骤:
 			 * 实例化一个客户端配置对象，可以指定超时时间等配置 */

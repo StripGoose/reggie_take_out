@@ -83,5 +83,5 @@ swagger:
 
 #腾讯云短信服务
 #txy:
-#  secretId: AKIDDF1WkhOoxqTpuiEUSAakdGciX5AzXppY
-#  secretKey: UhdHelbARSCfrnSqwlJaaIkunPkob7LJ
+#  secretId: XXXXXXXXXXXXXXXXXXXXXX
+#  secretKey: XXXXXXXXXXXXXXXXXX
