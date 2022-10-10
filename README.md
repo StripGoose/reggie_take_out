@@ -1,6 +1,7 @@
-# reggie_take_out
+#技术栈
 
-**前后端分离外卖系统**
+##前端
+vue
 
 #前端 vue+element+axios
 
