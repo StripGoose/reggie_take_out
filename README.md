@@ -1,15 +1,23 @@
 
 # 技术栈
 
-##前端
-vue
+## 前端
++ vue
++ element-ul
++ axios
 
-#前端 vue+element+axios
+## 后端
++ SpringBoot
++ SpringMVC
++ MybatisPlus
 
-#后端 springboot+SpringMVC+mybatisplus
+## 数据库
++ Mysql (主从分离)
 
-#中间件 redis db：两个mysql，做主从分离配置
+## 中间件
++ Redis (热数据缓存)
++ Nginx (反向代理+静态资源部署)
 
-#网关 nginx做 反向代理+静态资源部署 配置
+## 第三方服务
++ 腾讯云短信服务
 
-#腾讯云坐第三方短信密钥
