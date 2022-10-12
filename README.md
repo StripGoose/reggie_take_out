@@ -25,3 +25,6 @@
 + 全局异常处理器
 + 统一封装结果类
 + 过滤器
+
+***用户端***
+ ![image](https://github.com/StripGoose/reggie_take_out/blob/master/backend.png)
